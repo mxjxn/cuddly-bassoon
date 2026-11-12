@@ -38,7 +38,9 @@ Then open the URL shown in your terminal (typically `http://localhost:5173`).
 - **Terrain, water, biomes** visible in both view modes
 - **Roads**: Trade routes (tan) vs share routes (green), visually distinct
 - **Sites**: Founded for reasons, shown with terrain context
-- **Dual view modes**: Top-down and isometric projections of the same sim
+- **Dual view modes**: 
+  - **ASCII/ANSI top-down**: Dwarf Fortress-style character-based view using IBM VGA 16-color palette, CP437 glyphs, and box-drawing characters for roads. Terrain appears as colored backgrounds with typographic marks; roads are overlaid with connected line segments; sites have distinct glyphs by type
+  - **Isometric**: 3D-projected view of the same simulation
 - **Watchable generation**: World forms before your eyes — terrain shapes, sites found, roads cut, constructions rise, failures occur, commons emerge
 
 ### Gameplay
@@ -77,5 +79,12 @@ The codebase separates concerns:
   - `worldgen.ts` - Site founding and year loop
   - `economy.ts` - Production, roads, construction, failures
   - `pathfinding.ts` - A* for trade and share routes
-- `src/render/` - Canvas rendering systems (top-down and isometric)
+- `src/render/` - Canvas rendering systems (ASCII top-down and isometric)
+  - `topdown.ts` - ASCII/ANSI character-based renderer with CP437 glyphs
+  - `ansiColors.ts` - IBM VGA 16-color palette and glyph definitions
+  - `boxDrawing.ts` - Road connectivity and box-drawing character selection
+  - `isometric.ts` - 3D projection renderer
 - `src/ui/` - Preact UI components and controls
+
+### Font Notes
+The ASCII/ANSI top-down renderer uses monospaced fonts with CP437 character support. The font stack prioritizes Consolas (Windows), DejaVu Sans Mono (Linux), and Courier New (fallback) for crisp rendering of box-drawing characters, terrain glyphs, and site markers. All fonts used are system fonts available on standard operating systems.
