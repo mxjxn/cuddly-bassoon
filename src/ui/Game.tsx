@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState, useCallback } from 'preact/hooks';
-import { generateWorld, getSiteAtPosition, getNearestSite } from '../sim/worldgen';
+import { getSiteAtPosition, getNearestSite } from '../sim/worldgen';
 import { createCamera, render } from '../render/renderer';
 import type { World } from '../sim/types';
 import type { Camera, ViewMode } from '../render/types';
 import { Controls } from './Controls';
 import { HistoryPanel } from './HistoryPanel';
 import { HUD } from './HUD';
+import { WorldGeneration } from './WorldGeneration';
+
+type GameState = 'generating' | 'playing';
 
 export function Game() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gameState, setGameState] = useState<GameState>('generating');
   const [world, setWorld] = useState<World | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('topdown');
   const [seed, setSeed] = useState<string>(generateRandomSeed());
@@ -19,14 +23,10 @@ export function Game() {
     return Math.random().toString(36).substring(2, 10);
   }
 
-  const initWorld = useCallback((newSeed: string) => {
-    const newWorld = generateWorld(newSeed);
+  const handleGenerationComplete = useCallback((newWorld: World) => {
     setWorld(newWorld);
     cameraRef.current = createCamera(newWorld.player.position.x, newWorld.player.position.y);
-  }, []);
-
-  useEffect(() => {
-    initWorld(seed);
+    setGameState('playing');
   }, []);
 
   useEffect(() => {
@@ -121,15 +121,20 @@ export function Game() {
   const handleNewWorld = () => {
     const newSeed = generateRandomSeed();
     setSeed(newSeed);
-    initWorld(newSeed);
+    setWorld(null);
+    setGameState('generating');
   };
 
   const handleToggleView = () => {
     setViewMode(prev => prev === 'topdown' ? 'isometric' : 'topdown');
   };
 
+  if (gameState === 'generating') {
+    return <WorldGeneration seed={seed} viewMode={viewMode} onComplete={handleGenerationComplete} />;
+  }
+
   if (!world) {
-    return <div class="loading">Generating world...</div>;
+    return <div class="loading">Initializing...</div>;
   }
 
   const currentSite = getSiteAtPosition(world, world.player.position.x, world.player.position.y);

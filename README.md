@@ -39,6 +39,7 @@ Then open the URL shown in your terminal (typically `http://localhost:5173`).
 - **Roads**: Trade routes (tan) vs share routes (green), visually distinct
 - **Sites**: Founded for reasons, shown with terrain context
 - **Dual view modes**: Top-down and isometric projections of the same sim
+- **Watchable generation**: World forms before your eyes — terrain shapes, sites found, roads cut, constructions rise, failures occur, commons emerge
 
 ### Gameplay
 - **Player character** with WASD/arrow key movement
@@ -46,6 +47,7 @@ Then open the URL shown in your terminal (typically `http://localhost:5173`).
 - **HUD** shows position, location, and view mode
 - **History panel** tells the timeline of what happened
 - **Controls**: View toggle, seed display, world regeneration
+- **Generation controls**: Skip animation or jump to completion while watching world form
 
 ## Later Work
 
