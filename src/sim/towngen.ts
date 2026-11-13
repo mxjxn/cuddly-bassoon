@@ -1,10 +1,11 @@
 import { SeededRandom } from './random';
-import type { Site, Town, Building, Position, BuildingType } from './types';
+import { generateLandscape } from './townLandscape';
+import type { Site, Town, Building, Position, BuildingType, World } from './types';
 
-export function generateTown(site: Site, worldSeed: string): Town {
-  const rng = new SeededRandom(`${worldSeed}-${site.id}`);
+export function generateTown(site: Site, world: World): Town {
+  const rng = new SeededRandom(`${world.seed}-${site.id}`);
   
-  const width = Math.max(40, site.radius * 8);
+  const width = Math.max(48, site.radius * 8);
   const height = Math.max(40, site.radius * 6);
   
   const buildings: Building[] = [];
@@ -28,6 +29,9 @@ export function generateTown(site: Site, worldSeed: string): Town {
       generateCommons(site, width, height, buildings, streets, entryPoints, rng);
       break;
   }
+
+  const landscape = generateLandscape(site, world, width, height, buildings, streets);
+  const worldBiome = world.terrain[site.y]?.[site.x]?.biome ?? 'plains';
   
   return {
     siteId: site.id,
@@ -35,7 +39,10 @@ export function generateTown(site: Site, worldSeed: string): Town {
     height,
     buildings,
     streets,
-    entryPoints
+    entryPoints,
+    landscape,
+    siteType: site.type,
+    worldBiome
   };
 }
 

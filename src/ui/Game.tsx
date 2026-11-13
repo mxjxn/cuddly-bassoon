@@ -17,32 +17,38 @@ export function Game() {
   const [gameState, setGameState] = useState<GameState>('generating');
   const [world, setWorld] = useState<World | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('topdown');
-  const [seed, setSeed] = useState<string>(generateRandomSeed());
+  const [seed, setSeed] = useState<string>(readSeedFromUrl);
   const cameraRef = useRef<Camera>(createCamera(0, 0));
   const keysRef = useRef<Set<string>>(new Set());
   const [currentTown, setCurrentTown] = useState<Town | null>(null);
   const [hoveredBuilding, setHoveredBuilding] = useState<Building | null>(null);
   const townCacheRef = useRef<Map<string, Town>>(new Map());
+  const debugSiteHandledRef = useRef(false);
 
   function generateRandomSeed(): string {
     return Math.random().toString(36).substring(2, 10);
   }
 
-  const handleGenerationComplete = useCallback((newWorld: World) => {
-    setWorld(newWorld);
-    cameraRef.current = createCamera(newWorld.player.position.x, newWorld.player.position.y);
-    setGameState('playing');
-  }, []);
+  function readSeedFromUrl(): string {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('seed') || generateRandomSeed();
+  }
 
-  const zoomIntoSite = useCallback((siteId: string) => {
-    if (!world) return;
+  function readDebugSiteParam(): string | null {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('site');
+  }
+
+  const zoomIntoSite = useCallback((siteId: string, fromWorld?: World) => {
+    const w = fromWorld || world;
+    if (!w) return;
     
-    const site = world.sites.find(s => s.id === siteId);
+    const site = w.sites.find(s => s.id === siteId);
     if (!site) return;
     
     let town = townCacheRef.current.get(siteId);
     if (!town) {
-      town = generateTown(site, world.seed);
+      town = generateTown(site, w);
       townCacheRef.current.set(siteId, town);
     }
     
@@ -55,6 +61,37 @@ export function Game() {
       currentSiteId: siteId
     };
   }, [world]);
+
+  const handleGenerationComplete = useCallback((newWorld: World) => {
+    setWorld(newWorld);
+    cameraRef.current = createCamera(newWorld.player.position.x, newWorld.player.position.y);
+    setGameState('playing');
+
+    // Debug: ?site=company-town|freeport|... or ?site=site-3
+    if (!debugSiteHandledRef.current) {
+      const param = readDebugSiteParam();
+      if (param) {
+        debugSiteHandledRef.current = true;
+        const byId = newWorld.sites.find(s => s.id === param);
+        const byType = newWorld.sites.find(s => s.type === param);
+        const target = byId || byType;
+        if (target) {
+          setWorld({
+            ...newWorld,
+            player: { position: { x: target.x, y: target.y } }
+          });
+          cameraRef.current = createCamera(target.x, target.y);
+          // Defer zoom so state settles
+          requestAnimationFrame(() => {
+            zoomIntoSite(target.id, {
+              ...newWorld,
+              player: { position: { x: target.x, y: target.y } }
+            });
+          });
+        }
+      }
+    }
+  }, [zoomIntoSite]);
 
   const zoomOutToWorld = useCallback(() => {
     if (!world) return;
@@ -199,7 +236,7 @@ export function Game() {
         }
       }
 
-      render(world, ctx, cameraRef.current, viewMode, currentTown || undefined, hoveredBuilding);
+      render(world, ctx, cameraRef.current, viewMode, currentTown || undefined, hoveredBuilding, currentTime);
 
       animationId = requestAnimationFrame(gameLoop);
     };

@@ -14,13 +14,14 @@ export function render(
   camera: Camera,
   viewMode: ViewMode,
   town?: Town,
-  hoveredBuilding?: Building | null
+  hoveredBuilding?: Building | null,
+  animTime?: number
 ): void {
   const canvas = ctx.canvas;
   const context: RenderContext = { ctx, camera, viewMode, canvas };
 
   if (camera.zoomLevel === 'town' && town) {
-    renderTown(world, town, context, hoveredBuilding || null);
+    renderTown(world, town, context, hoveredBuilding || null, animTime);
   } else if (viewMode === 'topdown') {
     renderTopDown(world, context);
   } else {

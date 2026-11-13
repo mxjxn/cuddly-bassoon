@@ -95,6 +95,42 @@ export interface Building {
   isRuined?: boolean;
 }
 
+export type GroundKind =
+  | 'meadow'
+  | 'scrub'
+  | 'forest'
+  | 'forest-edge'
+  | 'marsh'
+  | 'pond'
+  | 'stream'
+  | 'sand'
+  | 'rock'
+  | 'cliff'
+  | 'peak'
+  | 'spoil'
+  | 'trampled'
+  | 'garden'
+  | 'path'
+  | 'stump'
+  | 'orchard'
+  | 'flower'
+  | 'bare';
+
+export type LandscapeAnim = 'grass' | 'flower' | 'water' | 'tree' | 'reed';
+
+export interface LandscapeTile {
+  elevation: number;
+  moisture: number;
+  fertility: number;
+  ground: GroundKind;
+  char: string;
+  fg: string;
+  bg: string;
+  anim?: LandscapeAnim;
+  animChar?: string;
+  animFg?: string;
+}
+
 export interface Town {
   siteId: string;
   width: number;
@@ -102,4 +138,7 @@ export interface Town {
   buildings: Building[];
   streets: Position[];
   entryPoints: Position[];
+  landscape: LandscapeTile[][];
+  siteType: SiteType;
+  worldBiome: BiomeType;
 }

@@ -1,79 +1,23 @@
 # Town View Screenshots
 
-## Overview
+Seed used: `land2` (has all five site types). Debug zoom: `?seed=land2&site=freeport`
 
-This directory contains screenshots demonstrating the town zoom level feature.
+## Files
 
-## Screenshots
+| File | What it shows |
+|------|----------------|
+| `01-world-map.png` | World map with enriched biome glyphs |
+| `02-commons.png` | Commons — gardens, orchards, meadows, stream/pond |
+| `02-company-town.png` | Company town — cleared spoil, stumps, mountain rim |
+| `02-freeport.png` | Freeport — shoreline, sand, docks into water, grove clusters |
+| `02-guild-city.png` | Guild city — tended greens, forest biome vegetation |
+| `02-failed-charter.png` | Failed charter — overgrown reclaim, ruins, mushrooms/logs |
 
-### World Map (01-world-map.png)
-The top-down ASCII/ANSI world map showing sites as single glyphs. Different site types have different symbols and colors:
-- Company Town: Yellow ■
-- Freeport: Cyan ◆  
-- Guild City: Yellow ●
-- Failed Charter: Gray ▢
-- Commons: Green ✦
+## Landscape features (town scale)
 
-### Commons Town (02-commons.png)
-A commons settlement showing:
-- Organic street layout following curves
-- Community Pantry (if constructed)
-- Free Library  
-- Shared residential plots
-- Assembly Hall for gatherings
-- Cooperative workshops (if constructed)
-- Optional Solidarity Café
-
-## Town Type Layouts
-
-Each site type generates a distinct, deterministic layout based on its worldgen history:
-
-### Company Town
-- Grid street pattern
-- Company Store (central, if constructed)
-- Processing Mill/Cannery
-- Barracks for workers
-- Company Housing blocks
-- Optional bar ("The Wage Cage")
-
-### Freeport
-- Irregular street pattern
-- Multiple docks/piers along the bottom edge
-- Central Free Market
-- Warehouses (if constructed)
-- Residential areas
-- "The Free Anchor" bar
-
-### Guild City
-- Radial street pattern from center
-- Multiple Guild Halls (Smiths, Carpenters, Weavers, Masons)
-- Workshops (if constructed)
-- Master's Houses (residential)
-- Guild Commons venue in center
-
-### Failed Charter
-- Deteriorated irregular streets
-- Ruined company store (abandoned)
-- Multiple ruins of various building types
-- Small survivor shelters
-- Optional "Last Stand Tavern"
-
-### Commons
-- Organic, flowing street layout
-- Community Pantry (if constructed)
-- Free Library
-- Shared residential plots
-- Assembly Hall
-- Cooperative workshops (if constructed)
-- Optional Solidarity Café
-
-## Rendering Style
-
-All towns use ASCII/ANSI 16-color rendering:
-- Walls: `#` (various colors by building type)
-- Doors: `+` (bright colors)
-- Floors: `.` (dark colors)
-- Streets: `═` (gray box-drawing characters)
-- Ruins: `▒` walls, `·` floors, `÷` doors (all gray)
-
-Buildings show their name on hover/selection.
+- Multi-octave warped fBm for elevation, moisture, fertility, vegetation
+- Clustered groves (not pure salt-and-pepper)
+- Meadows always glyph-filled with dark green tint (no flat green voids)
+- Site flavor: spoil/stumps (company), shoreline (freeport), gardens (commons/guild), overgrowth (failed)
+- Animated grass/flower/water/tree/reed shimmer + soft time-of-day dim
+- Building clearings, door paths, street shoulders

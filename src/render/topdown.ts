@@ -32,6 +32,51 @@ function blendColors(color1: string, color2: string, ratio: number): string {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
+/** Lightweight deterministic vegetation variety for world-map tiles (keeps sites/roads legible). */
+function enrichTerrainGlyph(
+  biome: string,
+  x: number,
+  y: number,
+  height: number
+): { char: string; fg: string } | null {
+  const h = ((x * 73856093) ^ (y * 19349663) ^ (Math.floor(height * 1000) * 83492791)) >>> 0;
+  const r = (h % 1000) / 1000;
+
+  switch (biome) {
+    case 'forest':
+      if (r < 0.25) return { char: '♠', fg: ANSI_COLORS.green };
+      if (r < 0.45) return { char: '↑', fg: ANSI_COLORS.brightGreen };
+      if (r < 0.55) return { char: 'τ', fg: ANSI_COLORS.green };
+      return null;
+    case 'plains':
+      if (r < 0.12) return { char: '*', fg: ANSI_COLORS.brightYellow };
+      if (r < 0.22) return { char: "'", fg: ANSI_COLORS.brightGreen };
+      if (r < 0.32) return { char: ',', fg: ANSI_COLORS.green };
+      if (r < 0.4) return { char: '°', fg: ANSI_COLORS.brightMagenta };
+      return null;
+    case 'hills':
+      if (r < 0.2) return { char: '^', fg: ANSI_COLORS.brightYellow };
+      if (r < 0.35) return { char: 'n', fg: ANSI_COLORS.yellow };
+      if (r < 0.45) return { char: '∩', fg: ANSI_COLORS.white };
+      return null;
+    case 'mountains':
+      if (r < 0.3) return { char: '▲', fg: ANSI_COLORS.brightWhite };
+      if (r < 0.5) return { char: '^', fg: ANSI_COLORS.white };
+      if (r < 0.65) return { char: '∩', fg: ANSI_COLORS.brightBlack };
+      return null;
+    case 'coast':
+      if (r < 0.3) return { char: '~', fg: ANSI_COLORS.brightYellow };
+      if (r < 0.5) return { char: '.', fg: ANSI_COLORS.yellow };
+      return null;
+    case 'water':
+      if (r < 0.35) return { char: '~', fg: ANSI_COLORS.cyan };
+      if (r < 0.55) return { char: '≈', fg: ANSI_COLORS.brightBlue };
+      return null;
+    default:
+      return null;
+  }
+}
+
 export function renderTopDown(world: World, context: RenderContext): void {
   const { ctx, camera, canvas } = context;
 
@@ -97,6 +142,12 @@ export function renderTopDown(world: World, context: RenderContext): void {
         // Determine what character to draw
         let char: string = terrainStyle.char;
         let fgColor: string = terrainStyle.fg;
+
+        const enrich = enrichTerrainGlyph(terrain.biome, x, y, terrain.height);
+        if (enrich) {
+          char = enrich.char;
+          fgColor = enrich.fg;
+        }
         
         // Check for road
         const roadType = roadTypeMap.get(tileKey);
