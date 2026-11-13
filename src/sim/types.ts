@@ -63,3 +63,43 @@ export interface World {
   player: Player;
   currentYear: number;
 }
+
+export type BuildingType = 
+  | 'company-store' 
+  | 'mill' 
+  | 'cannery'
+  | 'barracks' 
+  | 'company-housing'
+  | 'dock' 
+  | 'market' 
+  | 'warehouse'
+  | 'guild-hall' 
+  | 'workshop'
+  | 'residence'
+  | 'pantry' 
+  | 'library'
+  | 'bar'
+  | 'venue'
+  | 'ruin';
+
+export interface Building {
+  id: string;
+  type: BuildingType;
+  name: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  doorX?: number;
+  doorY?: number;
+  isRuined?: boolean;
+}
+
+export interface Town {
+  siteId: string;
+  width: number;
+  height: number;
+  buildings: Building[];
+  streets: Position[];
+  entryPoints: Position[];
+}
