@@ -67,6 +67,10 @@ Not yet implemented:
 - Pure client-side (no backend)
 - Deterministic world generation from seed
 
+## Docs
+
+- [On-chain design](docs/ONCHAIN_DESIGN.md) — autonomous world, inputs on chain, player influence (living design notes).
+
 ## Architecture
 
 The codebase separates concerns:
