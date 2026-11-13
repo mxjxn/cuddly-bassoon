@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'preact/hooks';
 import { getSiteAtPosition, getNearestSite } from '../sim/worldgen';
 import { generateTown } from '../sim/towngen';
 import { createCamera, render } from '../render/renderer';
-import { getBuildingAtPosition } from '../render/town';
+import { getBuildingAtPosition, screenToTownTile, clampTownCamera, getTownTileSize, invalidateTownCache } from '../render/town';
 import type { World, Town, Building } from '../sim/types';
 import type { Camera, ViewMode } from '../render/types';
 import { Controls } from './Controls';
@@ -171,9 +171,9 @@ export function Game() {
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
 
-      const TILE_SIZE = 12;
-      const worldX = Math.floor((mouseX - canvas.width / 2) / TILE_SIZE + cameraRef.current.x);
-      const worldY = Math.floor((mouseY - canvas.height / 2) / TILE_SIZE + cameraRef.current.y);
+      const { x: worldX, y: worldY } = screenToTownTile(
+        mouseX, mouseY, cameraRef.current, canvas, currentTown
+      );
 
       const building = getBuildingAtPosition(currentTown, worldX, worldY);
       setHoveredBuilding(building);
@@ -219,7 +219,7 @@ export function Game() {
       } else if (cameraRef.current.zoomLevel === 'town' && currentTown) {
         let dx = 0;
         let dy = 0;
-        const speed = 20;
+        const speed = 28;
 
         if (keysRef.current.has('w') || keysRef.current.has('arrowup')) dy -= 1;
         if (keysRef.current.has('s') || keysRef.current.has('arrowdown')) dy += 1;
@@ -231,9 +231,12 @@ export function Game() {
           dx = (dx / length) * speed * deltaTime;
           dy = (dy / length) * speed * deltaTime;
 
-          cameraRef.current.x = Math.max(0, Math.min(currentTown.width - 1, cameraRef.current.x + dx));
-          cameraRef.current.y = Math.max(0, Math.min(currentTown.height - 1, cameraRef.current.y + dy));
+          cameraRef.current.x += dx;
+          cameraRef.current.y += dy;
         }
+
+        const tileSize = getTownTileSize(currentTown, canvas);
+        clampTownCamera(cameraRef.current, currentTown, canvas, tileSize);
       }
 
       render(world, ctx, cameraRef.current, viewMode, currentTown || undefined, hoveredBuilding, currentTime);
@@ -257,6 +260,7 @@ export function Game() {
     setCurrentTown(null);
     setHoveredBuilding(null);
     townCacheRef.current.clear();
+    invalidateTownCache();
     setGameState('generating');
   };
 

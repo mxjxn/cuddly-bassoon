@@ -1,23 +1,20 @@
-# Town View Screenshots
+# Town View Screenshots (landscape polish)
 
-Seed used: `land2` (has all five site types). Debug zoom: `?seed=land2&site=freeport`
+Seed: `land2` · Debug: `?seed=land2&site=<type|site-id>`
 
-## Files
+| File | Shows |
+|------|--------|
+| `01-world-map.png` | World map |
+| `02-commons.png` | Commons — meadows, gardens, stream/pond |
+| `02-failed-charter.png` | Failed charter — overgrowth reclaim |
+| `02-freeport.png` | Freeport — irregular shore, sand, depth bands |
+| `02-company-town.png` | Company town (first match) |
+| `02-mountains-company.png` | Factorytown (`site-0`) — mountains biome slopes |
 
-| File | What it shows |
-|------|----------------|
-| `01-world-map.png` | World map with enriched biome glyphs |
-| `02-commons.png` | Commons — gardens, orchards, meadows, stream/pond |
-| `02-company-town.png` | Company town — cleared spoil, stumps, mountain rim |
-| `02-freeport.png` | Freeport — shoreline, sand, docks into water, grove clusters |
-| `02-guild-city.png` | Guild city — tended greens, forest biome vegetation |
-| `02-failed-charter.png` | Failed charter — overgrown reclaim, ruins, mushrooms/logs |
+## Polish pass notes
 
-## Landscape features (town scale)
-
-- Multi-octave warped fBm for elevation, moisture, fertility, vegetation
-- Clustered groves (not pure salt-and-pepper)
-- Meadows always glyph-filled with dark green tint (no flat green voids)
-- Site flavor: spoil/stumps (company), shoreline (freeport), gardens (commons/guild), overgrowth (failed)
-- Animated grass/flower/water/tree/reed shimmer + soft time-of-day dim
-- Building clearings, door paths, street shoulders
+- Larger wilderness around settlement; tile size covers viewport; screen-space fill
+- Noise-driven shores, shallows/deep, sand/reeds, sparse ripples
+- Mountain slopes via elevation + aspect (∩ n ^ ▲), no ░▒▓ columns
+- Calmer meadows; smaller grove patches; settlement as focal point
+- High-contrast buildings/streets

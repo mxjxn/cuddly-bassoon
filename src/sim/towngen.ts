@@ -4,9 +4,14 @@ import type { Site, Town, Building, Position, BuildingType, World } from './type
 
 export function generateTown(site: Site, world: World): Town {
   const rng = new SeededRandom(`${world.seed}-${site.id}`);
-  
-  const width = Math.max(48, site.radius * 8);
-  const height = Math.max(40, site.radius * 6);
+
+  // Settlement footprint, then pad with wilderness so the view can fill the viewport
+  const settleW = Math.max(42, site.radius * 7);
+  const settleH = Math.max(34, site.radius * 5);
+  const marginX = 40;
+  const marginY = 34;
+  const width = settleW + marginX * 2;
+  const height = settleH + marginY * 2;
   
   const buildings: Building[] = [];
   const streets: Position[] = [];
@@ -14,20 +19,36 @@ export function generateTown(site: Site, world: World): Town {
   
   switch (site.type) {
     case 'company-town':
-      generateCompanyTown(site, width, height, buildings, streets, entryPoints, rng);
+      generateCompanyTown(site, settleW, settleH, buildings, streets, entryPoints, rng);
       break;
     case 'freeport':
-      generateFreeport(site, width, height, buildings, streets, entryPoints, rng);
+      generateFreeport(site, settleW, settleH, buildings, streets, entryPoints, rng);
       break;
     case 'guild-city':
-      generateGuildCity(site, width, height, buildings, streets, entryPoints, rng);
+      generateGuildCity(site, settleW, settleH, buildings, streets, entryPoints, rng);
       break;
     case 'failed-charter':
-      generateFailedCharter(site, width, height, buildings, streets, entryPoints, rng);
+      generateFailedCharter(site, settleW, settleH, buildings, streets, entryPoints, rng);
       break;
     case 'commons':
-      generateCommons(site, width, height, buildings, streets, entryPoints, rng);
+      generateCommons(site, settleW, settleH, buildings, streets, entryPoints, rng);
       break;
+  }
+
+  // Offset settlement into the center of the wilderness map
+  for (const b of buildings) {
+    b.x += marginX;
+    b.y += marginY;
+    if (b.doorX !== undefined) b.doorX += marginX;
+    if (b.doorY !== undefined) b.doorY += marginY;
+  }
+  for (const s of streets) {
+    s.x += marginX;
+    s.y += marginY;
+  }
+  for (const e of entryPoints) {
+    e.x += marginX;
+    e.y += marginY;
   }
 
   const landscape = generateLandscape(site, world, width, height, buildings, streets);

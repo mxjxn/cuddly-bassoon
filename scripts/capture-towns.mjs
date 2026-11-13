@@ -1,21 +1,29 @@
 import { chromium } from 'playwright';
-import { mkdirSync } from 'fs';
+import { mkdirSync, copyFileSync } from 'fs';
 
 mkdirSync('screenshots', { recursive: true });
 mkdirSync('/opt/cursor/artifacts', { recursive: true });
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 const SEED = 'land2';
-const types = ['commons', 'company-town', 'freeport', 'guild-city', 'failed-charter'];
+
+// Requested: commons, failed-charter, freeport, company-town, plus mountain/hill site
+const shots = [
+  { key: 'world-map', url: `http://127.0.0.1:5173/?seed=${SEED}`, waitTown: false, file: 'screenshots/01-world-map.png' },
+  { key: 'commons', url: `http://127.0.0.1:5173/?seed=${SEED}&site=commons`, waitTown: true, file: 'screenshots/02-commons.png' },
+  { key: 'failed-charter', url: `http://127.0.0.1:5173/?seed=${SEED}&site=failed-charter`, waitTown: true, file: 'screenshots/02-failed-charter.png' },
+  { key: 'freeport', url: `http://127.0.0.1:5173/?seed=${SEED}&site=freeport`, waitTown: true, file: 'screenshots/02-freeport.png' },
+  { key: 'company-town', url: `http://127.0.0.1:5173/?seed=${SEED}&site=company-town`, waitTown: true, file: 'screenshots/02-company-town.png' },
+  // Explicit mountain site (Factorytown)
+  { key: 'mountains', url: `http://127.0.0.1:5173/?seed=${SEED}&site=site-0`, waitTown: true, file: 'screenshots/02-mountains-company.png' },
+];
 
 const browser = await chromium.launch({ headless: true });
 
-async function capture(url, outPath, waitTown) {
+async function capture({ url, waitTown, file }) {
   const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
   console.log('→', url);
   await page.goto(url, { waitUntil: 'networkidle', timeout: 120000 });
-
-  // Wait for playing UI
   await page.waitForSelector('.game-container', { timeout: 120000 });
   await sleep(waitTown ? 14000 : 12000);
 
@@ -27,46 +35,28 @@ async function capture(url, outPath, waitTown) {
       await sleep(400);
     }
     if (!ok) {
-      console.error('FAILED to enter town view for', url);
-      await page.screenshot({ path: outPath.replace('.png', '-FAILED.png') });
+      console.error('FAILED town view', url);
+      await page.screenshot({ path: file.replace('.png', '-FAILED.png') });
       await page.close();
       return false;
     }
-    await sleep(1500); // let a few animation frames paint
+    await sleep(1800);
   }
 
-  await page.screenshot({ path: outPath });
-  console.log('saved', outPath);
+  await page.screenshot({ path: file });
+  console.log('saved', file);
   await page.close();
   return true;
 }
 
-// World map (no site zoom)
-await capture(
-  `http://127.0.0.1:5173/?seed=${SEED}`,
-  'screenshots/01-world-map.png',
-  false
-);
-
-for (const type of types) {
-  const file = `screenshots/02-${type}.png`;
-  await capture(
-    `http://127.0.0.1:5173/?seed=${SEED}&site=${type}`,
-    file,
-    true
-  );
-}
-
-// Copy to artifacts
-import { copyFileSync } from 'fs';
-for (const type of ['world-map', ...types.map(t => t)]) {
-  const src = type === 'world-map' ? 'screenshots/01-world-map.png' : `screenshots/02-${type}.png`;
-  const dst = `/opt/cursor/artifacts/${type === 'world-map' ? '01-world-map' : '02-' + type}.png`;
+for (const shot of shots) {
+  await capture(shot);
+  const base = shot.file.split('/').pop();
   try {
-    copyFileSync(src, dst);
-    console.log('artifact', dst);
+    copyFileSync(shot.file, `/opt/cursor/artifacts/${base}`);
+    console.log('artifact', base);
   } catch (e) {
-    console.warn('copy failed', src, e.message);
+    console.warn('artifact copy failed', e.message);
   }
 }
 
